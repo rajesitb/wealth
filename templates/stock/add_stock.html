@@ -1,0 +1,232 @@
+{% extends 'stock/base.html' %}
+{% block extrahead %}
+    <style>
+        .navbar {
+            background-color: darkblue;
+        }
+
+        .card {
+            min-height: 40vh;
+            margin-top: 15%;
+            background-color: #e6e6ff;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .card {
+                margin-top: 20%;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid" style="min-height: 85vh; ">
+
+        <div class="row mt-3">
+
+            <div class="col-md-10 offset-md-1">
+                <div class="card " style="">
+                    <div class="row">
+                        <div class="col-md-8 offset-md-2">
+                            {% if messages %}
+                                <ul class="messages">
+                                    {% for message in messages %}
+                                        <li{% if message.tags %}
+                                            class="bg-success text-white text-center"{% endif %}>{{ message }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-header text-white " style="background-color: #6666ff">
+                        Add Stock
+                    </div>
+                    <div class="card-body">
+
+                        <form action="" method="post">
+                            <div class="row">
+
+                                {% csrf_token %}
+                                <div class="col-md-2">
+                                    <label for="select_stock">Select a Stock:</label>
+                                    <input class="form-control" list="data_stock" id="select_stock" name="data-stock"/>
+                                    <small class="text-muted" style="font-size: .6rem; margin-top: -5px">Type stock name
+                                        or code to select form drop down</small>
+                                    <datalist id="data_stock">
+                                        {% for foo in data_bank %}
+                                            <option value="{{ foo.0 }} {{ foo.1 }}">{{ foo.1 }}</option>
+                                        {% endfor %}
+                                    </datalist>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_action_stock">Ann Type:</label>
+                                    <input class="form-control" list="action_stock" id="id_action_stock"
+                                           name="action-stock"/>
+                                    <datalist id="action_stock">
+                                        <option value="Bonus">
+                                        <option value="Stock Split">
+                                    </datalist>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_date">Ann Date:</label>
+                                    <input class="form-control" type="date" id="id_date" name="action-date">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_ratio">Ratio:</label>
+                                    <input class="form-control" type="text" id="id_ratio" name="action-ratio">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_action_board">AGM/EGM:</label>
+                                    <input class="form-control" type="date" id="id_action_board" name="action-board">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_action_ex_date">Ex Date:</label>
+                                    <input class="form-control" type="date" id="id_action_ex_date"
+                                           name="action-ex-date">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_action_rd">RD:</label>
+                                    <input class="form-control" type="date"
+                                           id="id_action_rd" name="action-rd">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_stock_rec">Recommendation:</label>
+                                    <input class="form-control" list="stock_rec" id="id_stock_rec"
+                                           name="stock-rec"/>
+                                    <datalist id="stock_rec">
+                                        <option value="Wait">
+                                        <option value="Accumulate">
+                                        <option value="Buy">
+                                        <option value="Hold">
+                                        <option value="Exit">
+                                    </datalist>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_stock_comment">Comments:</label>
+                                    <textarea name="stock-comment" id="id_stock_comment" cols="10" rows="1"
+                                              class="form-control"></textarea>
+
+                                </div>
+                                {% if stk_object %}
+                                    <div class="col-md-2">
+                                        <label for="id_action_buy_date">Buy Date:</label>
+                                        <input class="form-control" type="date" id="id_action_buy_date"
+                                               max={% now "Y-m-d" %}
+                                                       name="action-buy-date">
+
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="id_action_buy_price">Buy Price:</label>
+                                        <input class="form-control" type="text" id="id_action_buy_price"
+                                               name="action-buy-price">
+
+                                        <a href="" data-id="{{ stk_object.stock_number }}" id="id_quote"
+                                           class="btn btn-sm btn-primary mb-1"
+                                           data-toggle="modal" data-target="#exampleModal">Get Quote</a><br>
+                                        <a id="id_set_cmp" href="" class="btn btn-sm btn-secondary mb-1">set cmp</a>
+
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="id_action_exit_date">Exit Date:</label>
+                                        <input class="form-control" type="date" id="id_action_exit_date"
+                                               name="action-exit-date">
+
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="id_action_exit_price">Exit Price:</label>
+                                        <input class="form-control" type="text" id="id_action_exit_price"
+                                               name="action-exit-price">
+
+
+                                    </div>
+                                {% endif %}
+
+                            </div>
+                            <input type="submit" value="{% if stk_object %}update{% else %}save{% endif %}"
+                                   class="btn btn-secondary border-white">
+                            {% if not stk_object %}
+                                <a href="{% url 'action-list' %}" class="float-md-right">See Table</a>
+                            {% endif %}
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <span><i id="reload" style="cursor: pointer" class="fas fa-redo float-right ml-5 hide"></i></span>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <span id="load_icon"></span>
+                    <span id="loader_spin" class="text-center hide"><i id="loader"
+                                                                       class="fas fa-spinner fa-spin"></i></span>
+                    <p id="current_value"></p>
+                    <p id="updated_on"></p>
+                    <p id="change"></p>
+                    <p id="high"></p>
+                    <p id="low"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block jquery %}
+    {% include 'stock/modaljs.html' %}
+    <script>
+        $('#id_set_cmp').click(function (e) {
+            e.preventDefault();
+            try {
+                let length = cmp.length;
+                $('#id_action_buy_price').val(cmp)
+            } catch (TypeError) {
+                alert('Please get quote first!')
+            } finally {
+                $('#id_action_buy_price').val(cmp)
+            }
+
+            // if (cmp.length === 0) {
+            //  alert('Please get quote first!')
+            //} else {
+            // $('#id_action_buy_price').val(cmp)
+            //}
+        });
+
+        $('#id_quote').click(function () {
+            let stock_id = $(this).data("id");
+            $('#exampleModal').on("show.bs.modal", function () {
+                $('#loader_spin').removeClass('hide');
+                updateStockData(stock_id)
+            });
+        });
+        {% if stk_object %}
+            $('input[name="data-stock"]').val("{{ stk_object.stock_name }}").attr('readonly', true);
+            $('input[name="action-stock"]').val("{{ stk_object.action_type}}").attr('readonly', true);
+            $('#id_date').val('{{ stk_object.action_date|date:"Y-m-d"}}');
+            $('#id_action_board').val('{{ stk_object.agm_egm|date:"Y-m-d"}}');
+            $('#id_action_rd').val('{{ stk_object.rd|date:"Y-m-d"}}');
+            $('#id_stock_rec').val('{{ stk_object.recommendation}}');
+            $('#id_stock_comment').val('{{ stk_object.comment}}');
+            $('#id_action_buy_date').val('{{ stk_object.buy_date|date:"Y-m-d"}}');
+            $('#id_action_buy_price').val('{{ stk_object.buy_price}}');
+            $('#id_action_exit_date').val('{{ stk_object.exit_date|date:"Y-m-d"}}');
+            $('#id_ratio').val('{{ stk_object.action_ratio}}');
+            $('#id_action_ex_date').val('{{ stk_object.ex_date|date:"Y-m-d"}}');
+            $('#id_action_exit_price').val('{{ stk_object.exit_price}}');
+        {% endif %}
+    </script>
+{% endblock %}

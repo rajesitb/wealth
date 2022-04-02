@@ -1,0 +1,26 @@
+{% extends 'stock/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div style="min-height: 90vh; background-color:whitesmoke">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 offset-md-3">
+                    <div class="card" style="margin-top: 200px">
+                        <div class="card-header">
+                            <h4>Login</h4>
+                        </div>
+                        <div class="card-body">
+                            <form action="" method="post">
+                                {% csrf_token %}
+                                {{ form|crispy }}
+                                <input type="submit" class="btn btn-success">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'stock/base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block content %}
+<div class="container-fluid" style="min-height: 90vh; background-color: whitesmoke">
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card" style="margin-top: 100px;">
+            <div class="card-header">
+                <h4 class="bg-secondary text-white text-center">OSWC: Stock Recommendations</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped mt-5 mb-5 table-responsive-lg" id="stock_table"
+                           >
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+
+                            <th scope="col">Stock Name</th>
+                            <th scope="col">Buy Date</th>
+                            <th scope="col">Buy Price</th>
+                            <th scope="col">CMP</th>
+                            <th scope="col">Exit Date</th>
+                            <th scope="col">Exit Profit</th>
+                            <th scope="col">Comments</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            {% for object in stocks %}
+                                <th scope="row">{{ forloop.counter }}</th>
+
+                                <td class="font-weight-bolder" style="font-size: 1.2rem">{{ object.stock_name }}
+                                </td>
+                                <td>{{ object.buy_date }} <br>
+                                lapsed time: <br> {{ object.buy_date|timesince }}</td>
+                                <td>Buy below: {{ object.buy_price }} </td>
+
+                                <td>{% current_quote cmp_values object.stock_number object.buy_price as result%}
+                                Current Quote: {{ result.0 }} <br>
+                                Price Change: {{ result.1 }}</td>
+                                <td>{{ object.exit_date }}</td>
+                                <td>Sell above: {{ object.exit_price }}</td>
+                                <td>
+                                    {{ object.remarks }}
+                                </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock content%}

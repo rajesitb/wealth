@@ -1,0 +1,207 @@
+{% extends 'stock/base.html' %}
+{% load static %}
+{% block extrahead %}
+    <link href="{% static 'css/datatables.min.css' %}" rel="stylesheet">
+    {#    <link rel="stylesheet" href="{% static 'css/datatables-select.min.css' %}">#}
+    <style>
+        div.dataTables_wrapper div.dataTables_length select, div.dataTables_wrapper div.dataTables_length input {
+            min-width: 50px;
+        }
+
+        .info {
+            background-color: #0c5460;
+        }
+
+        .warning {
+            background-color: red;
+        }
+    </style>
+{% endblock extrahead %}
+{% block content %}
+    <div class="container-fluid  mt-5 mb-5 ">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+
+                            <li{% if message.tags %}
+                                class="{{ message.tags }} text-white text-center"{% endif %}>{{ message }}</li>
+
+
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+
+                <h2 class="text-center main-body">List of Stocks</h2>
+
+                <div style="max-height: 80vh; overflow-y: auto; overflow-x: hidden">
+                    <table class="table table-striped mt-5 mb-5 table-responsive-lg" id="stock_table"
+                           style="width: 80%; margin-left: 10%">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+
+                            <th scope="col">Stock Name</th>
+                            <th scope="col">Ann Type & Dt</th>
+                            <th scope="col">Ratio</th>
+                            <th scope="col">AGM/EGM</th>
+                            <th scope="col">Ex Date</th>
+                            <th scope="col">RD</th>
+                            <th scope="col">Updated on</th>
+                            <th scope="col">Reco</th>
+                            <th scope="col">Comments</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            {% for object in object_list %}
+                                <th scope="row">{{ forloop.counter }}</th>
+
+                                <td class="font-weight-bolder" style="font-size: 1.2rem">{{ object.stock_name }}<br>
+                                    <a href="https://www.bseindia.com/stock-share-price/{{ object.stock_identity }}/{{ object.stock_id }}/{{ object.stock_number }}/corp-announcements/"
+                                       target="_blank" class="btn btn-secondary mb-1">Corp News</a>
+                                    <br>
+                                    <a href="" data-id="{{ object.stock_number }}" id="id_quote" class="btn btn-primary mb-1"
+                                       data-toggle="modal" data-target="#exampleModal">Get Quote</a><br>
+                                    {% if request.user.is_superuser %}
+                                        <a href="" data-id="{{ object.id }}"
+                                           class="delete-stock btn btn-danger">Delete <i
+                                                class="fas fa-trash-alt"></i></a>
+                                    {% endif %}
+                                </td>
+                                <td><span style="font-weight: bolder">{{ object.action_type }}</span> <br>
+                                    announced on <br> <span style="font-weight: bolder">{{ object.action_date }}</span></td>
+                                <td>{{ object.action_ratio }}</td>
+                                <td>{{ object.agm_egm }}</td>
+                                <td>{{ object.ex_date }}</td>
+                                <td>{{ object.rd }} <br><small class="text-muted small">Remaining Time: {{ object.rd|timeuntil }}</small> </td>
+                                <td>{{ object.date_updated }}</td>
+                                <td><span class="action">{{ object.recommendation }}</span><br>
+                                    {% if request.user.is_superuser %}
+                                        <a href="{% url 'stock-edit' object.id %}" class="btn btn-primary mb-1">Edit</a>
+                                        <br>
+                                    {% endif %}
+                                    <a href="{% url 'stock-chart' object.stock_number object.stock_name %}"
+                                       class="btn btn-info">See
+                                        Chart</a>
+                                </td>
+                                <td>
+                                    {{ object.comment }}
+                                </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-10">
+                <a class="float-md-right btn btn-secondary" href="{% url  'add-stock' %}">add stock</a>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <span><i id="reload" style="cursor: pointer" class="fas fa-redo float-right ml-5 hide"></i></span>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <span id="load_icon"></span>
+                    <span id="loader_spin" class="text-center hide"><i id="loader"
+                                                                       class="fas fa-spinner fa-spin"></i></span>
+                    <p id="current_value"></p>
+                    <p id="updated_on"></p>
+                    <p id="change"></p>
+                    <p id="high"></p>
+                    <p id="low"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% csrf_token %}
+
+{% endblock %}
+{% block jquery %}
+    {% include 'stock/modaljs.html' %}
+    <script src="{% static 'js/datatables.min.js' %}"></script>
+
+    <script>
+        $('.delete-stock').click(function () {
+            let response = confirm('Are you sure you want to delete');
+            console.log(response);
+            if (response === true) {
+                let id = $(this).data('id');
+                $.post(`${location.origin}/delete-stock/${id}/`, function (data) {
+                    location.reload();
+                });
+
+            } else {
+                return false
+            }
+        });
+        $('th:nth-child(7)').on('click', function (e) {
+            e.preventDefault();
+            $(this).removeClass('sorting sorting_asc sorting_desc').addClass('sorting_desc_disabled sorting_asc_disabled')
+        });
+        $('th:nth-child(7)::after, th:nth-child(7)::before').css('content', ' ');
+        $('#stock_table').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+        $('.action').each(function (i, v) {
+            let content = $(this)[0].textContent;
+            if (content === "Accumulate" || content === "Buy") {
+                $(this).css({"color": "green", "font-weight": "600"})
+            }
+            if (content === "Exit") {
+                $(this).css({"font-weight": "600", "color": "red"})
+            }
+            console.log()
+        });
+
+
+        let clear_modal = function () {
+            $('.modal-title').html(``);
+            $('#current_value').html(``);
+            $('#updated_on').html(``);
+            $('#change').html(``);
+            $('#high').html(``);
+            $('#low').html(``);
+        };
+        $('#exampleModal').on("hide.bs.modal", function () {
+            clear_modal()
+        });
+        {# click get quote #}
+        $('#id_quote').click(function () {
+            let stock_id = $(this).data("id");
+            $('#exampleModal').on("show.bs.modal", function () {
+                $('#loader_spin').removeClass('hide');
+                updateStockData(stock_id)
+            });
+        });
+        {# reload the modal data #}
+        $('#reload').click(function () {
+            $('#load_icon').html(`<span>Loading...</span>`);
+            let stock_id = $(this).data("id");
+            updateStockData(stock_id)
+        })
+
+    </script>
+{% endblock jquery %}

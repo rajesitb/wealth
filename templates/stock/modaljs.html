@@ -1,0 +1,20 @@
+<script>
+    let cmp;
+    let updateStockData = function (stock_id) {
+            console.log('activated');
+            $.post({% url 'get-quote' %}, {'stock_id': stock_id}, function (data) {
+                let returnData = data['return'];
+                cmp = returnData.current_value;
+                $('#loader_spin').hide();
+                $('.modal-title').html(`Company Name: <span class="font-weight-bolder float-right ml-2">${returnData.company_name}</span>`);
+                $('#current_value').html(`Current Value: <span class="font-weight-bolder float-right">${returnData.current_value}</span>`);
+                $('#updated_on').html(`Updated on: <span class="font-weight-bolder float-right">${returnData.updated_on}</span>`);
+                $('#change').html(`Change: <span class="font-weight-bolder float-right">${returnData.change}</span>`);
+                $('#high').html(`Day High: <span class="font-weight-bolder float-right">${returnData.day_high}</span>`);
+                $('#low').html(`Day Low: <span class="font-weight-bolder float-right">${returnData.day_low}</span>`);
+                $('#reload').removeClass('hide').data("id", stock_id);
+                $('#load_icon').empty()
+
+            })
+        };
+</script>

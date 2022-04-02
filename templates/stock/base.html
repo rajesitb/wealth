@@ -1,0 +1,184 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+    <meta name="description" content="Opportunity arises to trade in a stock for a limited period and make
+reasonable profit. The stocks are carefully monitored for specific technical parameters before a buy call is given
+by a leading and a veteran market expert having over 20 years of experience">
+    <title>OSWC: {% if title %}{{ title }}{% else %} Wealth Creator {% endif %}</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css"/>
+    <!-- Google Fonts Roboto -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <!-- MDB -->
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}"/>
+
+    <link rel="stylesheet" href="{% static "css/mdb.min.css" %}"/>
+    <link rel="icon" href="{% static 'img/profit.png' %}" type="img/png">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif, 'Lato', sans-serif;
+            font-size: 15px;
+        }
+
+        .main-body {
+            margin-top: 100px;
+        }
+
+        /* Height for devices larger than 576px */
+        @media (min-width: 992px) {
+            #intro {
+                margin-top: -58.59px;
+            }
+        }
+
+        .navbar .nav-link {
+            color: #fff !important;
+        }
+
+        .view, body, html {
+            height: 100%
+        }
+
+        .navbar {
+            background-color: rgba(0, 0, 0, .2)
+        }
+
+        .page-footer, .top-nav-collapse {
+            background-color: darkblue;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .navbar {
+                background-color: darkblue;
+            }
+        }
+
+    </style>
+    <!-- Custom styles -->
+    {#    <link rel="stylesheet" href="css/style.css" />#}
+    {% block extrahead %}
+    {% endblock extrahead %}
+</head>
+<body>
+<!--Main Navigation-->
+<header>
+
+
+    <!-- Navbar -->
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar">
+        <div class="container-fluid">
+            <!-- Navbar brand -->
+            <a class="navbar-brand nav-link" target="_blank" href="{% url 'home' %}">
+                <img src="{% static 'img/profit.png' %}" width="40" height="40" alt="">
+                <strong>OSWC</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCreator"
+                    aria-controls="navbarCreator" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCreator">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" aria-current="page" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'buy-stocks-rec' %}" rel="nofollow"
+                           target="_blank">Stock Recommendation</a>
+                    </li>
+                    {% if request.user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'action-list' %}" rel="nofollow"
+                              >Stocks</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'company-news' %}" rel="nofollow"
+                               >Company News</a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+                <div class="my-0">
+                    <ul class="navbar-nav">
+                        {% if request.user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                        {% endif %}
+                        {#                        <li class="nav-item">#}
+                        {#                            <a href="{% url 'register' %}" class="btn btn-outline-white btn-lg my-0" type="submit">Get#}
+                        {#                                Started for free</a>#}
+                        {#                        </li>#}
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+    <!-- Navbar -->
+
+
+    {% block header %}
+
+    {% endblock header %}
+
+</header>
+<!--Main Navigation-->
+{% block content %}
+
+{% endblock %}
+
+
+<!--Footer-->
+<footer class=" text-lg-start" style="background-color: darkblue">
+
+    <div class="text-center">
+        <ul class="list-inline">
+            <li class="list-inline-item list-unstyled">
+                <a href="{% url  'terms-service' %}" >Terms of Service</a>
+            </li>
+            <li class="list-inline-item list-unstyled" >
+                <a href="{% url  'privacy-policy' %}">Privacy Policy</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Copyright -->
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+        © 2022 Copyright:
+        <a class="text-muted" href="#">Om Sai Wealth Creator</a>
+    </div>
+    <!-- Copyright -->
+</footer>
+<!--Footer-->
+<!-- jquery -->
+<script type="text/javascript" src="{% static "js/jquery.min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/popper.min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/bootstrap.min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/mdb.min.js" %}"></script>
+<!-- Custom scripts -->
+{#    <script type="text/javascript" src="js/script.js"></script>#}
+<script>
+    let csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    } //func
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    }); //setup
+</script>
+{% block jquery %}
+{% endblock jquery %}
+</body>
+</html>

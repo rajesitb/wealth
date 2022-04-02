@@ -1,0 +1,216 @@
+{% extends 'stock/base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block extrahead %}
+    <style>
+        .hide {
+            display: none;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid" style="margin-top: 150px">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                {% if messages %}
+                    <ul class="messages" style="margin-top: 100px">
+                        {% for message in messages %}
+
+                            <li{% if message.tags %}
+                                class="{{ message.tags }} text-white text-center"{% endif %}>{{ message }}</li>
+
+
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        <div class="col-md-10 offset-1">
+
+
+            <h4>Corporate Action List <a id="refresh_button" href="#"
+                                         class="btn btn-light">refresh all</a>
+                <a id="refresh_button_select" href="#"
+                   class="btn btn-outline-dark">refresh select</a>
+                <a href="#" id="stop_refresh" class="btn btn-danger hide">stop refresh</a>
+                <small class="small float-md-right" style="font-size: .8rem">
+
+                    Last Scan On: <span
+                        id="id_scan_time">{{ last_search_at.record_date|date:"d M " }}</span></small>
+
+            </h4>
+            <p id="scan_progress"></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="card" style="max-height: 90vh; overflow: auto">
+                    <div class="card-header">
+
+                    </div>
+                    <div class="card-body">
+                        <table class="table mt-5 mb-5 table-responsive-lg" id="stock_table">
+                            <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Company</th>
+                                <th scope="col">Corporate Action Details</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for action in actions %}
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ action.record_date }}</td>
+                                    <td>{{ action.security_name }}</td>
+                                    <td>{% current_time action.message as message %}
+                                        <a target="_blank"
+                                           href="https://www.bseindia.com/stock-share-price/{{ action.security_name }}/{{ action.security_id }}/{{ action.security_number }}/corp-announcements/">{{ message.0 }}</a>
+                                        - {{ message.1 }}
+                                        <a href="{% url 'delete-news' action.id %}"
+                                           class="btn btn-sm btn-danger">remove</a></td>
+
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <th scope="row">0</th>
+                                    <td>No record</td>
+                                    <td>No record</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% csrf_token %}
+{% endblock %}
+{% block jquery %}
+    <script src="{% static 'js/datatables.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#stock_table').DataTable();
+            $('.dataTables_length').addClass('bs-select');
+        });
+
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        setInterval(function () {
+            $.post({% url 'update-scan' %}, function (data) {
+                let dateObj = data['update'];
+                let newDateObj = new Date(dateObj);
+                let month = months[newDateObj.getMonth()];
+                let timeValue = `${newDateObj.getDate()} ${month}, ${newDateObj.getHours()}:${newDateObj.getMinutes()}:${newDateObj.getSeconds()} IST`;
+                console.log(newDateObj.getTimezoneOffset());
+                $('#id_scan_time').text(timeValue)
+            })
+        }, 3600000);
+
+        // for refreshing complete stock list
+
+        let checkProgress = function (number) {
+            $.get({% url 'refresh-progress' %}, {num: number}, function (data) {
+                console.log(data);
+                if (data.count !== '2099/2100') {
+                    $('#scan_progress').text(`Progress: Scanning ${data['response']}, ${data.count}`)
+                } else {
+                    $('#stop_refresh').hide();
+                    stopRun();
+
+                }
+            })
+        };
+
+        // for refresh select
+        let checkProgress2 = function (number) {
+            $.get({% url 'refresh-progress-select' %}, {num: number}, function (data) {
+                console.log(data);
+                $('#scan_progress').text(`Progress: Scanning ${data['response']}, ${data.count}`)
+
+            })
+        };
+
+        let arr = [...Array(2100).keys()];
+
+        function* generateSequence() {
+            for (let number of arr) {
+                yield number
+            }
+        }
+
+        let generator = generateSequence();
+
+        let checkRun = function (genVal, funcProg) {
+            setInterval(function () {
+                let value = genVal.next();
+                console.log(value.done, value.value);
+                if (value.done) {
+                    $('#scan_progress').text('Scan completed... Reloading');
+                    stopRun()
+                } else {
+                    //98
+                    {#checkProgress(value.value)#}
+                    funcProg(value.value)
+                }
+
+            }, 3000);
+        };
+        let stopRun = function () {
+            clearInterval(checkRun);
+            $('#scan_progress').text('Scan interrupted... Reloading');
+
+                location.reload()
+
+        };
+
+        $('#stop_refresh').click(function (e) {
+            stopRun();
+            e.preventDefault();
+            $('#stop_refresh').hide();
+
+
+        });
+        // refresh first checks last refresh. if not the current date, it calls checkRun() at 112. which calls
+        // checkProgress line 98 every 3 sec with value from the generator func at 114 called at 120
+
+        $('#refresh_button').click(function (e) {
+            e.preventDefault();
+            $.get({% url 'refresh' %}, function (data) {
+                console.log(data);
+                if (data.response === "Only one scan per day permitted") {
+                    alert(`${data.response}. You have already scanned on {{ last_search_at.record_date }}`);
+                    location.reload();
+                } else {
+                    $('#stop_refresh').show();
+                    $('#scan_progress').text('Refreshing 2100 stocks...');
+                    //112
+                    checkRun(generator, checkProgress);
+                }
+            });
+
+        });
+
+
+        $('#refresh_button_select').click(function (e) {
+            $('#stop_refresh').show();
+            let stock_array = {{ stock_list|safe }};
+            $('#scan_progress').text(`Refreshing ${stock_array.length} stocks in your company action table...`);
+
+
+            function* newGenerateSequence() {
+                for (let number of stock_array) {
+                    yield number
+                }
+            }
+
+            let newGenerator = newGenerateSequence();
+
+
+            checkRun(newGenerator, checkProgress2);
+
+        });
+
+    </script>
+
+{% endblock jquery %}

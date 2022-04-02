@@ -1,0 +1,84 @@
+{% extends 'stock/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h4 class="text-center mb-5 main-body">1 Month Price Vol Chart for : {{ stock_name }}</h4>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col-md-8 offset-md-2">
+                <canvas id="lineChart"></canvas>
+                <h5 class="text-center">Signal: {{ signal.0 }}, Variance: {{ signal.1 }}</h5>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block jquery %}
+    <script src="{% static 'js/chart.js' %}"></script>
+    <script src="{% static 'js/chartjs-datalabels.js' %}"></script>
+    <script>
+        //line
+        var ctxL = document.getElementById("lineChart").getContext('2d');
+        var myLineChart = new Chart(ctxL, {
+            type: 'line',
+            data: {
+                labels: [{% for date in dates %}"{{ date }}", {% endfor %}],
+                datasets: [{
+                    label: "Traded Volumes",
+                    yAxisID: 'A',
+                    data: [{% for vol in volumes %} "{{ vol }}", {% endfor %}],
+
+                    backgroundColor: [
+                        'rgba(105, 0, 132, .2)',
+                    ],
+                    borderColor: [
+                        'rgba(200, 99, 132, .7)',
+                    ],
+                    borderWidth: 2
+                },
+                    {
+                        label: "Stock Price",
+                        yAxisID: 'B',
+                        data: [{% for value in values %}"{{ value }}", {% endfor %}],
+
+                        backgroundColor: [
+                            'rgba(0, 137, 132, .2)',
+                        ],
+                        borderColor: [
+                            'rgba(0, 10, 130, .7)',
+                        ],
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    yAxes: [{
+                        id: 'A',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Volume'
+                        },
+                    }, {
+                        id: 'B',
+                        type: 'linear',
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Price'
+                        },
+
+                    }]
+                }
+            }
+        });
+    </script>
+{% endblock %}

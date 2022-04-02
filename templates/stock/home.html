@@ -1,0 +1,289 @@
+{% extends 'stock/base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% load crispy_forms_tags %}
+{% block extrahead %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sirin+Stencil&display=swap" rel="stylesheet">
+    <style>
+        .table-striped {
+            background-color: rgba(168, 165, 119, 0.07);
+        }
+    </style>
+{% endblock %}
+{% block header %}
+    <!-- Background image -->
+    <div id="intro" class="bg-image vh-100 shadow-1-strong">
+        <video style="min-width: 100%; min-height: 100%;" playsinline autoplay muted loop>
+            <source class="h-100" src="https://mdbootstrap.com/img/video/Lines.mp4" type="video/mp4"/>
+        </video>
+        <div class="mask" style="
+        background: linear-gradient(
+          45deg,
+          rgba(29, 236, 197, 0.7),
+          rgba(91, 14, 214, 0.7) 100%
+        );
+      ">
+            <div class="container d-flex align-items-center justify-content-center text-center h-100">
+                <div class="text-white">
+                    <h1 class="mb-3">Om Sai Wealth Creator</h1>
+                    <h5 class="mb-4">Create Wealth Systematically</h5>
+                    <a
+                            class="btn btn-outline-light btn-lg m-2"
+                            href="{% url 'buy-stocks-rec' %}"
+                            role="button"
+                            rel="nofollow"
+                            target="_blank"
+                    >See Stocks</a>
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'logout' %}"
+                           class="btn btn-outline-light btn-lg m-2"
+                           role="button"
+                        >Log Out
+                        </a>
+                    {% else %}
+                        <a
+                                class="btn btn-outline-light btn-lg m-2"
+                                href=""
+                                data-toggle="modal"
+                                data-target="#loginModal"
+                                role="button"
+                        >Log in</a>
+                    {% endif %}
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li{% if message.tags %}
+                                    class="bg-danger list-unstyled text-white text-center"{% endif %}>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Background image -->
+
+{% endblock %}
+{% block content %}
+<script async src="https://cse.google.com/cse.js?cx=c3b33464f38c342cd">
+</script>
+{#    format of search api#}
+{#'https://www.googleapis.com/customsearch/v1?q={searchTerms}&num={count?}&start={startIndex?}&lr={language?}&safe={safe?}&cx={cx?}&sort={sort?}&filter={filter?}&gl={us}&cr={cr?}&googlehost={googleHost?}&c2coff={disableCnTwTranslation?}&hq={hq?}&hl={hl?}&siteSearch={siteSearch?}&siteSearchFilter={siteSearchFilter?}&exactTerms={exactTerms?}&excludeTerms={excludeTerms?}&linkSite={linkSite?}&orTerms={orTerms?}&relatedSite={relatedSite?}&dateRestrict={dateRestrict?}&lowRange={lowRange?}&highRange={highRange?}&searchType={searchType}&fileType={fileType?}&rights={rights?}&imgSize={imgSize?}&imgType={imgType?}&imgColorType={imgColorType?}&imgDominantColor={imgDominantColor?}&alt=json'#}
+<div class="gcse-search"></div>
+
+    <!--Main layout-->
+    <main class="mt-5">
+        <div class="container">
+            <!--Section: Content-->
+            <section>
+                <div class="row">
+                    <div class="col-md-6 gx-5 mb-4">
+                        <div class="bg-image hover-overlay ripple shadow-2-strong" data-mdb-ripple-color="light">
+                            <img src="{% static 'img/buycall.jpg' %}" height="200" class="img-fluid" alt="buy image"/>
+                            <a href="#!">
+                                <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 gx-5 mb-4">
+                        <h4><strong>Every Stock Gives an Opportunity</strong></h4>
+                        <p class="text-muted">
+                            Stocks give buy opportunity at specific times. We have studied this in depth
+                            over a prolonged period of time. The opportunity gives handsome results in a
+                            short span of time.
+                        </p>
+                        <p><strong>Short Hold Period</strong></p>
+                        <p class="text-muted">
+                            No need to hold a stock for long periods and get exposed to unexpected market
+                            movements. The risk is therefore minimized. Specific buy call is initiated.
+                            One can buy significant quantity and exit with Profit. Exit call is also given
+                            for booking profit over coming two or three trading sessions.
+                        </p>
+                        <p><strong>Registered Users</strong></p>
+                        <p class="text-muted">
+                            Total {{ users }} users have registered on this portal
+                        </p>
+                        <p><strong>Live Stock Recommendations</strong></p>
+                        <p class="text-muted">
+                            Total {{ stock_r }} stock recommendations are live currently.
+                            <button type="button" data-toggle="modal" data-target="#registerModal" class="btn btn-info"
+                                    data-dismiss="modal">Register
+                            </button>
+                            and
+                            profit from it !
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+            <div class="card mb-3">
+                <img src="{% static 'img/profit_graph.jpg' %}" class="card-img-top img-responsive"
+                     style="height: 400px"
+                     alt="Profit image"/>
+                <div class="card-body">
+                    <h2 class="card-title">Stock Performance</h2>
+                    <div class="card-text">
+                        <table class="table mt-5 mb-5 table-responsive-lg table-striped" id="stock_table">
+                            <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Stock Name</th>
+                                <th scope="col">Entry Price</th>
+                                <th scope="col">Exit Price</th>
+                                <th scope="col">Profit</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for stock in display %}
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ stock.stock_name }}</td>
+                                    <td>{{ stock.buy_price }} <br> on {{ stock.buy_date }}</td>
+                                    <td>{{ stock.exit_price }} <br> on {{ stock.exit_date }}</td>
+                                    <td>{% stock_result stock.buy_price stock.exit_price %} Per Share</td>
+
+
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <th scope="row">0</th>
+                                    <td>No record</td>
+                                    <td>No record</td>
+                                    <td>No record</td>
+                                    <td>No record</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                    <p class="card-text">
+                        <small class="text-muted">Last updated 3 mins ago</small>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    <!--Main layout-->
+    <!-- Modal Login -->
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Log In</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'login' %}" method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <input type="submit" class="btn btn-success">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-toggle="modal" data-target="#registerModal" class="btn btn-info"
+                            data-dismiss="modal">Register
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Register-->
+    <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Register</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'verify-otp' %}" id="regn_form" method="post">
+                        {% csrf_token %}
+                        <div id="div_id_mobile_2" class="form-group"><label for="id_mobile_2" class="">
+                            Mobile Number
+                        </label>
+                            <div><input type="text" name="mobile" maxlength="150"
+                                        class="textinput textInput form-control" id="id_mobile_2"> <small
+                                    id="hint_id_mobile" class="form-text text-muted">Enter your mobile number</small>
+                            </div>
+                        </div>
+
+                        <input type="button" class="btn btn-outline-secondary" role="button" value="get otp"
+                               id="id_get_otp">
+                        <div id="div_id_otp">
+                            <label for="id_otp_value"></label>
+                            <input type="text" class="form-control mt-3" placeholder="Enter your OTP here"
+                                   id="id_otp_value"
+                                   name="code">
+                        </div>
+
+                        <input type="text" hidden id="id_session_id" name="session_id">
+
+                        <div class="form-check mt-5">
+                            <input type="checkbox" id="id_agreement" class="form-check-input ">
+                            <label for="id_agreement" class="form-check-label small">By Registering, you agree to our Terms
+                                of Service
+                                and Privacy Policy</label>
+                        </div>
+
+                        <input type="submit" value="Register" class="btn btn-success disabled mt-3" id="submit_button">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary " data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block jquery %}
+    <script>
+
+    $('#id_agreement').change(function (e) {
+        if ($(this).is(":checked")) {
+            let otp_val = $('#id_otp_value');
+            if (otp_val.val().length > 0) {
+                $('#submit_button').removeClass('disabled')
+            } else {
+                alert('Please enter OTP first');
+                otp_val.focus()
+            }
+
+        } else {
+            $('#submit_button').addClass('disabled')
+        }
+    });
+    $('#id_get_otp').click(function (e) {
+        let value = $('#id_mobile_2');
+        if (value.val().length === 0) {
+            alert('You have not entered a 10 digit mobile number');
+            value.focus()
+        } else {
+            {#$('#regn_form').submit()#}
+            $.post({% url 'register' %}, {mob_num: value.val()}, function (data) {
+                $('#id_session_id').val(data['session_id'])
+            })
+        }
+    });
+    $('#id_mobile').change(function () {
+        let id = $(this);
+        let value = id.val();
+        if (value.length !== 10) {
+            alert('You have not entered a 10 digit mobile number');
+            id.val('').focus()
+        }
+    });
+
+    </script>
+{% endblock %}
