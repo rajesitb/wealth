@@ -47,10 +47,10 @@ import os
 from django.views.generic import ListView
 
 from .data import create_data_frame
-from stock.forms import ProfileCreateForm
-from stock.models import CoAction, StockData, CorpActionRecord, UserPhone, ScanData
+from .forms import ProfileCreateForm
+from .models import CoAction, StockData, CorpActionRecord, UserPhone, ScanData
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'createWealth.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wealth.settings')
 # Create your views here.
 
 
