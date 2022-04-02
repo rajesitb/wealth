@@ -583,8 +583,8 @@ def refresh(request):
         return JsonResponse({'response': 'success'})
 
 
-all_co_records = CoAction.objects.all()
-recorded_numbers = [x.stock_number for x in all_co_records]
+# all_co_records = CoAction.objects.all()
+# recorded_numbers = [x.stock_number for x in all_co_records]
 
 
 def refresh_progress_select(request):
