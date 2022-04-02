@@ -131,7 +131,7 @@ def login_user(request):
 
 
 sms_url = f'https://2factor.in/API/R1/?'
-apikey = os.environ.get('2factor_apikey')
+apikey = os.environ.get('factor_apikey')
 
 
 def register(request):
@@ -583,8 +583,8 @@ def refresh(request):
         return JsonResponse({'response': 'success'})
 
 
-# all_co_records = CoAction.objects.all()
-# recorded_numbers = [x.stock_number for x in all_co_records]
+all_co_records = CoAction.objects.all()
+recorded_numbers = [x.stock_number for x in all_co_records]
 
 
 def refresh_progress_select(request):
